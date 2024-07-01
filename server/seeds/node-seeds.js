@@ -1,4 +1,4 @@
-const { Node } = require('../models');
+const { Node } = require('../models').default;
 
 const nodeData = [
   {

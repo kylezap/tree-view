@@ -30,7 +30,8 @@ router.post('/', async(req, res) => {
     
     const nodeData = await Node.create({ name: nodeName,
       number: req.body.number,
-      parent_id: req.body.parent_id
+      parent_id: req.body.parent_id,
+      node_type: req.body.node_type
      });
     res.status(200).json(nodeData);
     console.log(nodeName, nodeData);

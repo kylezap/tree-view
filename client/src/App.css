@@ -11,6 +11,7 @@
   will-change: filter;
   transition: filter 300ms;
 }
+
 .logo:hover {
   filter: drop-shadow(0 0 2em #646cffaa);
 }
@@ -27,16 +28,29 @@
   }
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
-}
-
 .card {
   padding: 2em;
 }
 
-.read-the-docs {
-  color: #888;
+.node {
+  position: relative;
+  margin: 5px 0;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
 }
+
+.node-name {
+  font-weight: bold;
+}
+
+.children-container {
+  display: flex;
+  flex-direction: row; 
+  gap: 10px;
+}
+
+.node:hover {
+  background-color: #f0f0f0;
+}
+

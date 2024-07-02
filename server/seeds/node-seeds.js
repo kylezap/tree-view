@@ -1,11 +1,12 @@
-const { Node } = require('../models').default;
+const { Node } = require('../models');
 
 const nodeData = [
   {
     id: 1,
     parent_id: null,
-    name: 'root',
-    number: 1
+    name: 'Root',
+    node_type: 'root',
+    number: 1,
   }
 ];
 

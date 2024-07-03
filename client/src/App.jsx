@@ -8,14 +8,15 @@ function App() {
   const [editedNodeName, setEditedNodeName] = useState("");
   const [numberRanges, setNumberRanges] = useState({});
 
-  const apiUrl = process.env.REACT_APP_API_URL;
+  const apiUrl = import.meta.env.VITE_API_URL;
 
   useEffect(() => {
-    fetch("http://localhost:3001/api/nodes/")
+    console.log("API URL:", apiUrl)
+    fetch(`${apiUrl}`)
       .then((response) => response.json())
       .then((data) => setNodes(data))
       .catch((error) => console.error("Error fetching nodes:", error));
-  }, []);
+  }, [apiUrl]);
 
   const addFactoryNode = () => {
     const newFactory = {
@@ -25,7 +26,7 @@ function App() {
       number: 1,
     };
 
-    fetch("http://localhost:3001/api/nodes/", {
+    fetch(`${apiUrl}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -43,7 +44,7 @@ function App() {
   const deleteNode = async (nodeId) => {
     try {
       const response = await fetch(
-        `http://localhost:3001/api/nodes/${nodeId}`,
+        `${apiUrl}` + nodeId,
         {
           method: "DELETE",
         }
@@ -63,7 +64,7 @@ function App() {
   const updateNodeName = async (nodeId, updatedName) => {
     try {
       const response = await fetch(
-        `http://localhost:3001/api/nodes/${nodeId}`,
+        `${apiUrl}` + nodeId,
         {
           method: "PUT",
           headers: {
@@ -97,11 +98,11 @@ function App() {
     }
 
     try {
-      await fetch(`http://localhost:3001/api/nodes/clear/${nodeId}`, {
+      await fetch(`${apiUrl}` + nodeId, {
         method: "DELETE",
       });
 
-      const response = await fetch("http://localhost:3001/api/nodes/batch", {
+      const response = await fetch(`${apiUrl}` + 'batch', {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -211,14 +212,19 @@ function App() {
                   handleRangeChange(node.id, "max", e.target.value)
                 }
               />
-              <input
-                type="number"
-                placeholder="Count"
-                value={numberRanges[node.id]?.count || ""}
-                onChange={(e) =>
-                  handleRangeChange(node.id, "count", e.target.value)
-                }
-              />
+              <select
+  value={numberRanges[node.id]?.count || ""}
+  onChange={(e) => handleRangeChange(node.id, "count", e.target.value)}
+>
+  <option value="" hidden disabled selected>
+    Choose how many numbers
+  </option>
+  {[...Array(15).keys()].map((num) => (
+    <option key={num + 1} value={num + 1}>
+      {num + 1}
+    </option>
+  ))}
+</select>
               <button onClick={() => generateRandomNumbers(node.id)}>
                 Generate Numbers
               </button>

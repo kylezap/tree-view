@@ -1,91 +1,138 @@
-import React, { useEffect, useState } from 'react';
-import './App.css';
+import React, { useEffect, useState } from "react";
+import "./App.css";
 
 function App() {
-  // Initialize state to store nodes
   const [nodes, setNodes] = useState([]);
-  const [newFactoryName, setNewFactoryName] = useState('');
-  const [editingNodeId, setEditingNodeId] = useState(null); // Track which node is being edited
-  const [editedNodeName, setEditedNodeName] = useState(''); // Track the edited node name
+  const [newFactoryName, setNewFactoryName] = useState("");
+  const [editingNodeId, setEditingNodeId] = useState(null);
+  const [editedNodeName, setEditedNodeName] = useState("");
+  const [numberRanges, setNumberRanges] = useState({});
 
-  // Fetch nodes from the backend when the component mounts
+  const apiUrl = process.env.REACT_APP_API_URL;
+
   useEffect(() => {
-    fetch('http://localhost:3001/api/nodes/') // Adjust the URL as necessary
-      .then(response => response.json())
-      .then(data => setNodes(data))
-      .catch(error => console.error('Error fetching nodes:', error));
+    fetch("http://localhost:3001/api/nodes/")
+      .then((response) => response.json())
+      .then((data) => setNodes(data))
+      .catch((error) => console.error("Error fetching nodes:", error));
   }, []);
 
-  // Add new factory nodes
   const addFactoryNode = () => {
     const newFactory = {
       name: newFactoryName,
-      node_type: 'factory',
+      node_type: "factory",
       parent_id: 1,
       number: 1,
     };
 
-    fetch('http://localhost:3001/api/nodes/', {
-      method: 'POST',
+    fetch("http://localhost:3001/api/nodes/", {
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
       body: JSON.stringify(newFactory),
     })
-      .then(response => response.json())
-      .then(data => {
-        setNodes([...nodes, data]); // Assuming the backend returns the newly created node
-        setNewFactoryName(''); // Reset input field after successful creation
+      .then((response) => response.json())
+      .then((data) => {
+        setNodes([...nodes, data]);
+        setNewFactoryName("");
       })
-      .catch(error => console.error('Error adding new factory node:', error));
+      .catch((error) => console.error("Error adding new factory node:", error));
   };
 
-  // Delete nodes
   const deleteNode = async (nodeId) => {
     try {
-      const response = await fetch(`http://localhost:3001/api/nodes/${nodeId}`, {
-        method: 'DELETE',
-      });
+      const response = await fetch(
+        `http://localhost:3001/api/nodes/${nodeId}`,
+        {
+          method: "DELETE",
+        }
+      );
 
       if (!response.ok) {
-        throw new Error('Failed to delete the node');
+        throw new Error("Failed to delete the node");
       }
 
-      console.log('Node deleted successfully');
-      setNodes(nodes.filter(node => node.id !== nodeId));
+      console.log("Node deleted successfully");
+      setNodes(nodes.filter((node) => node.id !== nodeId));
     } catch (error) {
-      console.error('Error deleting node:', error);
+      console.error("Error deleting node:", error);
     }
   };
 
-  // Update node name
   const updateNodeName = async (nodeId, updatedName) => {
     try {
-      const response = await fetch(`http://localhost:3001/api/nodes/${nodeId}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ name: updatedName }),
-      });
-      console.log(response);
+      const response = await fetch(
+        `http://localhost:3001/api/nodes/${nodeId}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ name: updatedName }),
+        }
+      );
+
       if (!response.ok) {
-        throw new Error('Failed to update the node name');
-        
+        throw new Error("Failed to update the node name");
       }
 
       const updatedNode = await response.json();
-      setNodes(nodes.map(node => (node.id === nodeId ? updatedNode : node)));
+      setNodes(nodes.map((node) => (node.id === nodeId ? updatedNode : node)));
       setEditingNodeId(null);
-      setEditedNodeName('');
+      setEditedNodeName("");
     } catch (error) {
-      console.error('Error updating node name:', error);
+      console.error("Error updating node name:", error);
     }
   };
 
-  // Organize nodes by parent_id
+  const generateRandomNumbers = async (nodeId) => {
+    const { min, max, count } = numberRanges[nodeId];
+    if (!min || !max || !count) return;
+
+    const numbers = [];
+    for (let i = 0; i < Math.min(count, 15); i++) {
+      const randomNum = Math.floor(Math.random() * (max - min + 1)) + min;
+      numbers.push(randomNum);
+    }
+
+    try {
+      await fetch(`http://localhost:3001/api/nodes/clear/${nodeId}`, {
+        method: "DELETE",
+      });
+
+      const response = await fetch("http://localhost:3001/api/nodes/batch", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ parentId: nodeId, nodes: numbers }),
+      });
+
+      const newNodes = await response.json();
+      setNodes((prevNodes) => [
+        ...prevNodes.filter(
+          (node) => node.parent_id !== nodeId || node.node_type !== "number"
+        ),
+        ...newNodes,
+      ]);
+    } catch (error) {
+      console.error("Error generating random nodes:", error);
+    }
+  };
+
+  const handleRangeChange = (nodeId, field, value) => {
+    setNumberRanges({
+      ...numberRanges,
+      [nodeId]: {
+        ...numberRanges[nodeId],
+        [field]: Number(value),
+      },
+    });
+  };
+
   const nodesByParentId = nodes.reduce((acc, node) => {
-    const parentId = node.parent_id || 'root'; // Treat nodes without a parent_id as root nodes
+    const parentId = node.parent_id || "root";
     if (!acc[parentId]) {
       acc[parentId] = [];
     }
@@ -93,13 +140,12 @@ function App() {
     return acc;
   }, {});
 
-  // Recursive function to render nodes
   const renderNode = (node) => {
     const isEditing = editingNodeId === node.id;
     return (
       <div key={node.id}>
         <div className={`node ${node.node_type}`}>
-          {node.node_type === 'root' && (
+          {node.node_type === "root" && (
             <>
               <input
                 type="text"
@@ -108,10 +154,12 @@ function App() {
                 onChange={(e) => setNewFactoryName(e.target.value)}
                 placeholder="Enter factory name"
               />
-              <button className="add-factory-btn" onClick={addFactoryNode}>Add Factory</button>
+              <button className="add-factory-btn" onClick={addFactoryNode}>
+                Add Factory
+              </button>
             </>
           )}
-          {node.node_type === 'factory' && (
+          {node.node_type === "factory" && (
             <>
               {isEditing ? (
                 <>
@@ -120,42 +168,88 @@ function App() {
                     value={editedNodeName}
                     onChange={(e) => setEditedNodeName(e.target.value)}
                   />
-                  <button onClick={() => updateNodeName(node.id, editedNodeName)}>Save</button>
+                  <button
+                    onClick={() => updateNodeName(node.id, editedNodeName)}
+                  >
+                    Save
+                  </button>
                   <button onClick={() => setEditingNodeId(null)}>Cancel</button>
                 </>
               ) : (
                 <>
                   {node.name}
-                  <button onClick={() => { setEditingNodeId(node.id); setEditedNodeName(node.name); }}>Edit</button>
+                  <button
+                    onClick={() => {
+                      setEditingNodeId(node.id);
+                      setEditedNodeName(node.name);
+                    }}
+                  >
+                    Edit
+                  </button>
                 </>
               )}
-              <button className="delete-node-btn" onClick={() => deleteNode(node.id)}>Delete</button>
+              <button
+                className="delete-node-btn"
+                onClick={() => deleteNode(node.id)}
+              >
+                Delete
+              </button>
+
+              <input
+                type="number"
+                placeholder="Min"
+                value={numberRanges[node.id]?.min || ""}
+                onChange={(e) =>
+                  handleRangeChange(node.id, "min", e.target.value)
+                }
+              />
+              <input
+                type="number"
+                placeholder="Max"
+                value={numberRanges[node.id]?.max || ""}
+                onChange={(e) =>
+                  handleRangeChange(node.id, "max", e.target.value)
+                }
+              />
+              <input
+                type="number"
+                placeholder="Count"
+                value={numberRanges[node.id]?.count || ""}
+                onChange={(e) =>
+                  handleRangeChange(node.id, "count", e.target.value)
+                }
+              />
+              <button onClick={() => generateRandomNumbers(node.id)}>
+                Generate Numbers
+              </button>
             </>
           )}
         </div>
         {nodesByParentId[node.id] && (
           <div className="children-container">
             {nodesByParentId[node.id]
-              .filter(child => child.node_type === 'factory')
+              .filter((child) => child.node_type === "factory")
               .map(renderNode)}
-              <div>
-                {nodesByParentId[node.id]
-              .filter(child => child.node_type === 'number')
-              .map(renderNode)}
-              </div>
-            
+            <div className="number-nodes-container">
+              {nodesByParentId[node.id]
+                .filter((child) => child.node_type === "number")
+                .map((numberNode) => (
+                  <div className="number-node" key={numberNode.id}>
+                    {numberNode.number} {/* Display the node.number property */}
+                  </div>
+                ))}
+            </div>
           </div>
         )}
       </div>
     );
   };
 
-  // Render nodes using the Node component
   return (
     <>
       <h1>Node Tree</h1>
       <div className="app">
-        {nodesByParentId['root'] && nodesByParentId['root'].map(renderNode)}
+        {nodesByParentId["root"] && nodesByParentId["root"].map(renderNode)}
       </div>
     </>
   );

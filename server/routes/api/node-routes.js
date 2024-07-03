@@ -15,8 +15,24 @@ router.get('/', async (req, res) => {
   }
 });
 
-router.get('/:id', (req, res) => {
-  // find one node by its `id` value
+router.post('/batch', async (req, res) => {
+  // create multiple 'number' nodes
+  const { parentId, nodes } = req.body;
+  try {
+    const newNodes = await Node.bulkCreate(
+      nodes.map(number => ({
+        name: `Number ${number}`,
+        node_type: 'number',
+        parent_id: parentId,
+        number: number,
+      }))
+    );
+
+    res.status(201).json(newNodes);
+  } catch (error) {
+    console.error('Error creating nodes:', error);
+    res.status(500).send('Error creating nodes');
+  } 
 });
 
 router.post('/', async(req, res) => {
@@ -63,24 +79,41 @@ router.put('/:id', async (req, res) => {
 });
 
 router.delete('/:id', async (req, res) => {
-  // delete a node by its `id` value
   const { id } = req.params;
 
   try {
-    const deletedRows = await Node.destroy({
-      where: { id: id }
-    });
+    const node = await Node.findByPk(id);
 
-    if (deletedRows === 0) {
-      // No rows deleted implies node not found
+    if (!node) {
       return res.status(404).send('Node not found');
     }
 
-    res.send('Node deleted successfully');
+    await node.destroy();
+    res.send('Node and its children deleted successfully');
   } catch (error) {
     console.error('Error deleting node:', error);
     res.status(500).send('Error deleting node');
   }
 });
+
+
+router.delete('/clear/:parentId', async (req, res) => {
+  const { parentId } = req.params;
+
+  try {
+    const deletedRows = await Node.destroy({
+      where: {
+        parent_id: parentId,
+        node_type: 'number',
+      },
+    });
+
+    res.send(`${deletedRows} nodes deleted successfully`);
+  } catch (error) {
+    console.error('Error deleting nodes:', error);
+    res.status(500).send('Error deleting nodes');
+  }
+});
+
 
 module.exports = router;

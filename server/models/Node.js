@@ -44,4 +44,9 @@ Node.init(
   }
 );
 
+(async () => {
+  await sequelize.sync();
+  await sequelize.query("ALTER SEQUENCE node_id_seq RESTART WITH 5;");
+})();
+
 module.exports = Node;

@@ -7,6 +7,27 @@ const nodeData = [
     name: 'Root',
     node_type: 'root',
     number: 1,
+  },
+  {
+    id: 2,
+    parent_id: 1,
+    name: 'Awesome Factory',
+    node_type: 'factory',
+    number: 1,
+  },
+  {
+    id: 3,
+    parent_id: 1,
+    name: 'Cool Factory',
+    node_type: 'factory',
+    number: 1,
+  },
+  {
+    id: 4,
+    parent_id: 1,
+    name: 'Great Factory',
+    node_type: 'factory',
+    number: 1,
   }
 ];
 

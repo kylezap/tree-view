@@ -32,7 +32,7 @@
   padding: 2em;
 }
 
-.node {
+.node.factory {
   position: relative;
   margin: 5px 0;
   padding: 10px;
@@ -46,11 +46,11 @@
 
 .children-container {
   display: flex;
-  flex-direction: row; 
+  flex-direction: row;
   gap: 10px;
 }
 
-.node:hover {
+.node.factory:hover {
   background-color: #f0f0f0;
 }
 
@@ -61,7 +61,8 @@
   padding: 20px;
 }
 
-.factory-input, .add-factory-btn {
+.factory-input,
+.add-factory-btn {
   margin: 5px;
   padding: 10px;
   border-radius: 5px;
@@ -81,4 +82,31 @@
 
 .add-factory-btn:hover {
   background-color: #0056b3;
+}
+
+.factory {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 5px;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  gap: 10px;
+}
+
+.number-nodes-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Center 'number' nodes vertically */
+  justify-items: center; /* Center 'number' nodes horizontally */
+  padding: 10px 0; /* Space above and below 'number' nodes */
+}
+
+.number-node {
+  background-color: lightblue; /* Just an example */
+  margin: 5px 0; /* Space between 'number' nodes */
+  padding: 5px;
+  width: 100%; /* Prevents 'number' nodes from expanding the width of the factory */
+  text-align: center; /* Center text inside 'number' node */
 }

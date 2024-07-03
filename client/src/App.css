@@ -54,3 +54,31 @@
   background-color: #f0f0f0;
 }
 
+.root {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+}
+
+.factory-input, .add-factory-btn {
+  margin: 5px;
+  padding: 10px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+}
+
+.factory-input {
+  flex-grow: 1;
+}
+
+.add-factory-btn {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+.add-factory-btn:hover {
+  background-color: #0056b3;
+}

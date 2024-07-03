@@ -22,6 +22,9 @@ Node.init(
     name: {
       type: DataTypes.STRING,
       allowNull: false,
+       validate: {
+         len: [1],
+       },
     },
     node_type: {
       type: DataTypes.ENUM("factory", "number", "root"),

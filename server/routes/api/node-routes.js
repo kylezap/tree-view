@@ -42,24 +42,23 @@ router.post('/', async(req, res) => {
 });
 
 router.put('/:id', async (req, res) => {
-  // update a node by its `id` value
   const { id } = req.params;
-  const { newName } = req.body;
+  const { name } = req.body; // Expect 'name' in the request body
 
   try {
-    const [updatedRows] = await Node.update({ name: newName }, {
+    const [updatedRows] = await Node.update({ name }, {
       where: { id: id }
     });
 
     if (updatedRows === 0) {
-      // No rows updated implies node not found
       return res.status(404).send('Node not found');
     }
 
-    res.send('Node name updated successfully');
+    const updatedNode = await Node.findByPk(id);
+    res.json(updatedNode); // Return the updated node as JSON
   } catch (error) {
     console.error('Error updating node name:', error);
-    res.status(500).send('Error updating node name');
+    res.status(500).json({ error: 'Error updating node name' }); // Send JSON error response
   }
 });
 

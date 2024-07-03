@@ -1,19 +1,19 @@
 const { Model, DataTypes } = require("sequelize");
-
 const sequelize = require("../config/connection.js");
+const { v4: uuidv4 } = require("uuid");
 
 class Node extends Model {}
 
 Node.init(
   {
     id: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.UUID, // Change type to UUID
+      defaultValue: uuidv4, // Generate UUID automatically
       allowNull: false,
       primaryKey: true,
-      autoIncrement: true,
     },
     parent_id: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.UUID, // Change type to UUID
       references: {
         model: "node",
         key: "id",
@@ -22,9 +22,9 @@ Node.init(
     name: {
       type: DataTypes.STRING,
       allowNull: false,
-       validate: {
-         len: [1],
-       },
+      validate: {
+        len: [1],
+      },
     },
     node_type: {
       type: DataTypes.ENUM("factory", "number", "root"),
@@ -43,10 +43,5 @@ Node.init(
     modelName: "node",
   }
 );
-
-(async () => {
-  await sequelize.sync();
-  await sequelize.query("ALTER SEQUENCE node_id_seq RESTART WITH 5;");
-})();
 
 module.exports = Node;

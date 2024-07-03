@@ -5,5 +5,5 @@ A tree view of nodes. containing group of factories generated from a root. You c
 ## Technologies Used
 Postgres, Sequelize, Node, Express, React, Vite
 
-![screenshot](/public/image.png)
+![screenshot](client/public/image.png)
 

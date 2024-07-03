@@ -4,9 +4,9 @@
   "description": "A tree view in browser allowing for any number of factories, that in turn generate up to 15 random numbers",
   "main": "server/server.js",
   "scripts": {
-    "start": "node server/server.js",
+    "start": "node server/server.js && node server/seeds/index",
     "develop": "concurrently \"cd server && npm run watch\" \"cd client && npm run dev\"",
-    "install": "cd server && npm i && npm run seed && cd ../client && npm i",
+    "install": "cd server && npm i  && cd ../client && npm i",
     "build": "cd client && npm run build",
     "render-build":"npm install && npm run build"
   },

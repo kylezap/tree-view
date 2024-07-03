@@ -7,22 +7,34 @@ function App() {
   const [editingNodeId, setEditingNodeId] = useState(null);
   const [editedNodeName, setEditedNodeName] = useState("");
   const [numberRanges, setNumberRanges] = useState({});
+  const [rootId, setRootId] = useState(null); // State to store root node ID
 
   const apiUrl = import.meta.env.VITE_API_URL;
 
   useEffect(() => {
-    console.log("API URL:", apiUrl)
+    console.log("API URL:", apiUrl);
     fetch(`${apiUrl}`)
       .then((response) => response.json())
-      .then((data) => setNodes(data))
+      .then((data) => {
+        setNodes(data);
+        const rootNode = data.find((node) => node.node_type === "root");
+        if (rootNode) {
+          setRootId(rootNode.id); // Set the root node ID
+        }
+      })
       .catch((error) => console.error("Error fetching nodes:", error));
   }, [apiUrl]);
 
   const addFactoryNode = () => {
+    if (!rootId) {
+      console.error("Root node ID not found");
+      return;
+    }
+
     const newFactory = {
       name: newFactoryName,
       node_type: "factory",
-      parent_id: 1,
+      parent_id: rootId, // Use root node ID as parent_id
       number: 1,
     };
 
@@ -43,12 +55,9 @@ function App() {
 
   const deleteNode = async (nodeId) => {
     try {
-      const response = await fetch(
-        `${apiUrl}` + nodeId,
-        {
-          method: "DELETE",
-        }
-      );
+      const response = await fetch(`${apiUrl}/${nodeId}`, {
+        method: "DELETE",
+      });
 
       if (!response.ok) {
         throw new Error("Failed to delete the node");
@@ -63,16 +72,13 @@ function App() {
 
   const updateNodeName = async (nodeId, updatedName) => {
     try {
-      const response = await fetch(
-        `${apiUrl}` + nodeId,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ name: updatedName }),
-        }
-      );
+      const response = await fetch(`${apiUrl}/${nodeId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ name: updatedName }),
+      });
 
       if (!response.ok) {
         throw new Error("Failed to update the node name");
@@ -98,11 +104,13 @@ function App() {
     }
 
     try {
-      await fetch(`${apiUrl}` + nodeId, {
+      // Delete existing number nodes with the specified parent ID
+      await fetch(`${apiUrl}/deleteByParentId/${nodeId}`, {
         method: "DELETE",
       });
 
-      const response = await fetch(`${apiUrl}` + 'batch', {
+      // Create new number nodes
+      const response = await fetch(`${apiUrl}/batch`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -213,18 +221,18 @@ function App() {
                 }
               />
               <select
-  value={numberRanges[node.id]?.count || ""}
-  onChange={(e) => handleRangeChange(node.id, "count", e.target.value)}
->
-  <option value="" hidden disabled selected>
-    Choose how many numbers
-  </option>
-  {[...Array(15).keys()].map((num) => (
-    <option key={num + 1} value={num + 1}>
-      {num + 1}
-    </option>
-  ))}
-</select>
+                value={numberRanges[node.id]?.count || ""}
+                onChange={(e) => handleRangeChange(node.id, "count", e.target.value)}
+              >
+                <option value="" hidden disabled selected>
+                  Choose how many numbers
+                </option>
+                {[...Array(15).keys()].map((num) => (
+                  <option key={num + 1} value={num + 1}>
+                    {num + 1}
+                  </option>
+                ))}
+              </select>
               <button onClick={() => generateRandomNumbers(node.id)}>
                 Generate Numbers
               </button>

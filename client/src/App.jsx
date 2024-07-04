@@ -10,20 +10,27 @@ function App() {
   const [rootId, setRootId] = useState(null); // State to store root node ID
 
   const apiUrl = import.meta.env.VITE_API_URL;
-  
+
   useEffect(() => {
-    console.log("API URL:", apiUrl);
-    fetch(`${apiUrl}`)
-      .then((response) => response.json())
-      .then((data) => {
-        setNodes(data);
-        const rootNode = data.find((node) => node.node_type === "root");
-        if (rootNode) {
-          setRootId(rootNode.id); // Set the root node ID
-        }
-      })
-      .catch((error) => console.error("Error fetching nodes:", error));
-  }, [apiUrl]);
+  console.log("API URL:", apiUrl);
+  fetch(`${apiUrl}`)
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      return response.json();
+    })
+    .then((data) => {
+      console.log("Fetched nodes:", data);
+      setNodes(data);
+      const rootNode = data.find((node) => node.node_type === "root");
+      if (rootNode) {
+        setRootId(rootNode.id);
+      }
+    })
+    .catch((error) => console.error("Error fetching nodes:", error));
+}, [apiUrl]);
+
 
   const addFactoryNode = () => {
     if (!rootId) {

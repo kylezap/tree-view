@@ -11,7 +11,14 @@ router.get('/', async (req, res) => {
     res.status(200).json(nodeData);
     console.log('"Success!"');
   } catch (err) {
-    res.status(500).json(err);
+    console.error('Error occurred:', err);  // Log the detailed error to the console
+
+    // Send a detailed error response
+    res.status(500).json({
+      message: 'Internal server error',
+      error: err.message,
+      stack: process.env.NODE_ENV === 'development' ? err.stack : 'stack hidden'
+    });
   }
 });
 

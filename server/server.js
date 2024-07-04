@@ -25,17 +25,16 @@ app.use(cors(corsOptions));
 // create a middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
-// if (process.env.NODE_ENV === 'production') {
-//   app.use(express.static(path.join(__dirname, '../client/dist')));
-
-  // app.get('*', (req, res) => {
-  //   res.sendFile(path.join(__dirname, '../client/dist/index.html'));
-  // });
-// } 
-
-// turn on routes
 app.use(routes);
+
+if (process.env.NODE_ENV === 'production') {
+  app.use(express.static(path.join(__dirname, '../client/dist')));
+
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, '../client/dist/index.html'));
+  });
+} 
+
 
 // sync sequelize models to the database, then turn on the server
 sequelize.sync({ force: false }).then(() => {

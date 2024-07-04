@@ -8,17 +8,15 @@ router.get('/', async (req, res) => {
   // find all nodes
   try {
     const nodeData = await Node.findAll();
+    if (nodeData.length === 0) {
+      console.log("No nodes found in the database.");
+    } else {
+      console.log("Nodes retrieved successfully:", nodeData);
+    }
     res.status(200).json(nodeData);
-    console.log('"Success!"');
   } catch (err) {
-    console.error('Error occurred:', err);  // Log the detailed error to the console
-
-    // Send a detailed error response
-    res.status(500).json({
-      message: 'Internal server error',
-      error: err.message,
-      stack: process.env.NODE_ENV === 'development' ? err.stack : 'stack hidden'
-    });
+    console.error("Error retrieving nodes:", err);
+    res.status(500).json({ error: err.message });
   }
 });
 

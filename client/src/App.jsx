@@ -9,7 +9,7 @@ function App() {
   const [numberRanges, setNumberRanges] = useState({});
   const [rootId, setRootId] = useState(null); // State to store root node ID
 
-  const apiUrl = import.meta.env.VITE_API_URL;
+  const apiUrl = import.meta.env.BASE_URL + "/api/nodes";
 
   useEffect(() => {
     console.log("API URL:", apiUrl);

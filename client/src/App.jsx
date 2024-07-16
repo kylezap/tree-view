@@ -8,6 +8,64 @@ function App() {
   const [editedNodeName, setEditedNodeName] = useState("");
   const [numberRanges, setNumberRanges] = useState({});
   const [rootId, setRootId] = useState(null); // State to store root node ID
+  const [socket, setSocket] = useState(null);
+
+  useEffect(() => {
+    // Create WebSocket connection
+    const ws = new WebSocket('ws://localhost:3001');
+
+    // Connection opened
+    ws.addEventListener('open', (event) => {
+      console.log('WebSocket connection opened');
+    });
+
+    // Listen for messages
+    ws.addEventListener('message', (event) => {
+      const message = JSON.parse(event.data);
+      switch (message.action) {
+        case 'addNode':
+          setNodes((prevNodes) => [...prevNodes, message.data]);
+          break;
+        case 'addNodes':
+          setNodes((prevNodes) => [...prevNodes, ...message.data]);
+          break;
+        case 'updateNode':
+          setNodes((prevNodes) =>
+            prevNodes.map((node) =>
+              node.id === message.data.id ? message.data : node
+            )
+          );
+          break;
+        case 'deleteNode':
+          setNodes((prevNodes) =>
+            prevNodes.filter((node) => node.id !== message.data)
+          );
+          break;
+        case 'clearNodes':
+          setNodes((prevNodes) =>
+            prevNodes.filter((node) => node.parent_id !== message.data)
+          );
+          break;
+        default:
+          break;
+      }
+    });
+
+    // Listen for connection close
+    ws.addEventListener('close', (event) => {
+      console.log('WebSocket connection closed');
+    });
+
+    // Listen for errors
+    ws.addEventListener('error', (event) => {
+      console.error('WebSocket error: ', event);
+    });
+
+    // Cleanup on component unmount
+    return () => {
+      ws.close();
+    };
+  }, []);
 
   const apiUrl = import.meta.env.VITE_API_URL;
 

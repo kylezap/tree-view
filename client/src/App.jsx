@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import "./App.css";
+import  io  from "socket.io-client";
 
 function App() {
   const [nodes, setNodes] = useState([]);
@@ -11,6 +12,18 @@ function App() {
 
   const apiUrl = import.meta.env.VITE_API_URL;
 
+  //Websockets
+  useEffect(() => {
+    const socket = io('https://tree-view.onrender.com');
+    socket.on('connect', () => {
+      console.log('Connected to the server');
+      socket.emit('example_event', { data: 'Hello from the client!' });
+    });
+
+    return () => socket.disconnect();
+  }, []);
+
+  //Fetching nodes and updating state
   useEffect(() => {
   console.log("API URL:", apiUrl);
   fetch(`${apiUrl}`)
